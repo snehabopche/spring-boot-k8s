@@ -48,7 +48,41 @@ pipeline {
 
         stage('Login to ECR') {
             steps {
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: '91e3d8da-d01c-4ffb-b7ab-55848d8f90b3']]) {
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: '91e3d8da-d01c-4ffb-b7ab-55848d8f90b3'
+                ]]) {
                     sh '''
-                        aws ecr get-login-password --region $AWS_REGION |_
+                        aws ecr get-login-password --region $AWS_REGION |
+                        docker login --username AWS --password-stdin 897722705551.dkr.ecr.$AWS_REGION.amazonaws.com
+                    '''
+                }
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                sh '''
+                    docker tag ${ECR_REPO_NAME}:${IMAGE_TAG} ${FULL_IMAGE_NAME}
+                    docker push ${FULL_IMAGE_NAME}
+                '''
+            }
+        }
+
+        stage('Deploy to EKS') {
+            steps {
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: '91e3d8da-d01c-4ffb-b7ab-55848d8f90b3'
+                ]]) {
+                    sh '''
+                        aws eks update-kubeconfig --region $AWS_REGION --name springboot-cluster
+                        kubectl apply -f k8s/springboot-deployment.yaml
+                        kubectl apply -f k8s/springboot-service.yaml
+                    '''
+                }
+            }
+        }
+    }
+}
 
