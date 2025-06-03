@@ -1,6 +1,6 @@
 pipeline {
     agent any
-    
+
     tools {
         jdk 'Java17'
         maven 'Maven3'
@@ -10,8 +10,6 @@ pipeline {
         AWS_REGION = 'ca-central-1'
         ECR_REPO_NAME = 'springboot-ecr'
         IMAGE_TAG = 'v1'
-        ECR_REGISTRY = '897722705551.dkr.ecr.${AWS_REGION}.amazonaws.com'
-        FULL_IMAGE_NAME = "${ECR_REGISTRY}/${ECR_REPO_NAME}:${IMAGE_TAG}"
     }
 
     stages {
@@ -26,11 +24,20 @@ pipeline {
                 sh 'mvn clean package -DskipTests'
             }
         }
-        
+
         stage('Prepare JAR') {
             steps {
                 sh 'cp target/spring-boot-2-hello-world-1.0.2-SNAPSHOT.jar app.jar'
-            } 
+            }
+        }
+
+        stage('Set Image Variables') {
+            steps {
+                script {
+                    env.ECR_REGISTRY = "897722705551.dkr.ecr.${env.AWS_REGION}.amazonaws.com"
+                    env.FULL_IMAGE_NAME = "${env.ECR_REGISTRY}/${env.ECR_REPO_NAME}:${env.IMAGE_TAG}"
+                }
+            }
         }
 
         stage('Build Docker Image') {
@@ -41,10 +48,12 @@ pipeline {
 
         stage('Login to ECR') {
             steps {
-                sh '''
-                    aws ecr get-login-password --region $AWS_REGION |
-                    docker login --username AWS --password-stdin $ECR_REGISTRY
-                '''
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: '91e3d8da-d01c-4ffb-b7ab-55848d8f90b3']]) {
+                    sh '''
+                        aws ecr get-login-password --region $AWS_REGION |
+                        docker login --username AWS --password-stdin 897722705551.dkr.ecr.$AWS_REGION.amazonaws.com
+                    '''
+                }
             }
         }
 
