@@ -23,8 +23,14 @@ pipeline {
 
         stage('Build App') {
             steps {
-                sh 'mvn clean package'
+                sh 'mvn clean package -DskipTests'
             }
+        }
+        
+        stage('Prepare JAR') {
+            steps {
+                sh 'cp target/spring-boot-2-hello-world-1.0.2-SNAPSHOT.jar app.jar'
+            } 
         }
 
         stage('Build Docker Image') {

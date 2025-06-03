@@ -1,4 +1,4 @@
 FROM openjdk:17
-COPY target/spring-boot-hello-world-*.jar app.jar
+COPY COPY app.jar app.jar
 ENTRYPOINT ["java", "-jar", "/app.jar"]
 
