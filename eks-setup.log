@@ -1,0 +1,15 @@
+🔧 Creating ECR Repository...
+
+An error occurred (RepositoryAlreadyExistsException) when calling the CreateRepository operation: The repository with name 'springboot-ecr' already exists in the registry with id '897722705551'
+ℹ️ ECR repo may already exist
+🔐 Creating IAM Role for EKS Cluster...
+
+An error occurred (EntityAlreadyExists) when calling the CreateRole operation: Role with name EKSClusterRole already exists.
+ℹ️ Cluster role may already exist
+🔐 Creating IAM Role for EKS Node Group...
+
+An error occurred (EntityAlreadyExists) when calling the CreateRole operation: Role with name EKSNodeGroupRole already exists.
+ℹ️ Node role may already exist
+🌐 Creating VPC using CloudFormation...
+
+An error occurred (AlreadyExistsException) when calling the CreateStack operation: Stack [eks-vpc-stack] already exists
